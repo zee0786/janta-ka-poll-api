@@ -11,6 +11,12 @@ class postsController {
   static createPost(req, res) {
     const newId = parseInt(Posts.length) + 1;
     const { title, body } = req.body;
+    const errorsObj = [...(title ? [] : ['title not present']), ...(body ? [] : ['body not present'])]
+    if (errorsObj.length) {
+      return res.status(400).json({
+        message: errorsObj
+      })
+    }
     const newPost = {
       id: newId,
       title,
@@ -54,16 +60,14 @@ class postsController {
   }
   static deletePost(req, res) {
     let { id } = req.params;
-    const findPost = Posts.find(post => {
+    const findPostIndex = Posts.findIndex(post => {
       return post.id == id;
     });
-    if (findPost) {
-      const newPosts = Posts.filter(post => {
-        return post !== findPost;
-      });
+    if (~findPostIndex) {
+      Posts.splice(findPostIndex)
       res.status(200).json({
         message: "post successfully deleted",
-        Posts: newPosts
+        Posts
       });
     } else {
       res.status(400).json({
